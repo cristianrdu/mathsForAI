@@ -62,9 +62,7 @@ class Battle:
         self.robot_2 = robot_2
 
         # select first robot
-        self.current_acting_robot = self.robot_1
-
-        # random.choice( ... ) this does not work
+        self.current_acting_robot = random.choice([self.robot_1, self.robot_2])
 
     def battle_ended(self):
         # returns True if the battle has finished
@@ -111,9 +109,6 @@ class Battle:
             # Check if battle ended
             if self.battle_ended() is True:
                 battle_ongoing = False
-
-            # Set the damage points sent by the previous robot.
-            attack_points = new_attack_points
 
         winner = self.announce_winner()
 
