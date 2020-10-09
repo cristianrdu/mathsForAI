@@ -2,12 +2,12 @@ from enum import IntEnum
 import random
 
 
-class GameRules(IntEnum):
+class GameRules:
     INITIAL_HEALTH_POINTS = 1000
     INITIAL_ENERGY = 1000
 
 
-class RobotPoints(IntEnum):
+class RobotPoints:
     FORCE = 5
     FAIL_PERCENTAGE = 10
 
@@ -15,7 +15,6 @@ class RobotPoints(IntEnum):
 class Robot:
 
     def __init__(self, name):
-
         self.name = name
 
         self.initial_energy = GameRules.INITIAL_ENERGY
@@ -27,8 +26,11 @@ class Robot:
         self.energy = self.initial_energy
         self.health_points = self.initial_health_points
 
-    def decide_on_action(self, attack_strength):
+    def decide_on_action(self, action_type):
         # for now, robots will be very dumb and always attack.
+
+        attack_strength = 0
+
         if self.energy > 0:
             attack_strength = self.attack()
 
@@ -62,7 +64,7 @@ class Battle:
         # select first robot
         self.current_acting_robot = self.robot_1
 
-        # random.choice( ... )
+        # random.choice( ... ) this does not work
 
     def battle_ended(self):
         # returns True if the battle has finished
@@ -80,9 +82,9 @@ class Battle:
         # returns the winner
 
         if self.robot_1.health_points > self.robot_2.health_points:
-            return self.robot_1
+            return self.robot_1.name
 
-        return self.robot_2
+        return self.robot_2.name
 
     def battle_until_the_end(self):
 
@@ -96,13 +98,18 @@ class Battle:
 
             # inflict damages on the current robot
             # the current robot produces new_damages
-
             new_attack_points = self.current_acting_robot.decide_on_action(attack_points)
 
             # Change the current_acting_robot. If it was robot_1, then now it is robot_2
+            if self.current_acting_robot == self.robot_1:
+                self.robot_1.health_points -= new_attack_points
+                self.current_acting_robot = self.robot_2
+            else:
+                self.robot_2.health_points -= new_attack_points
+                self.current_acting_robot = self.robot_1
 
             # Check if battle ended
-            if self.battle_ended is True:
+            if self.battle_ended() is True:
                 battle_ongoing = False
 
             # Set the damage points sent by the previous robot.
@@ -117,4 +124,6 @@ robot1 = Robot('spock')
 robot2 = Robot('donald')
 
 battleground = Battle(robot1, robot2)
-battleground.battle_until_the_end()
+winn = battleground.battle_until_the_end()
+
+print("The winner is: ", winn)
