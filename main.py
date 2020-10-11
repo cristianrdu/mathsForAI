@@ -26,8 +26,10 @@ class Robot:
         self.energy = self.initial_energy
         self.health_points = self.initial_health_points
 
-    def decide_on_action(self, action_type):
+    def decide_on_action(self, incoming_damage):
         # for now, robots will be very dumb and always attack.
+
+        self.health_points -= incoming_damage
 
         attack_strength = 0
 
@@ -100,25 +102,74 @@ class Battle:
 
             # Change the current_acting_robot. If it was robot_1, then now it is robot_2
             if self.current_acting_robot == self.robot_1:
-                self.robot_1.health_points -= new_attack_points
                 self.current_acting_robot = self.robot_2
             else:
-                self.robot_2.health_points -= new_attack_points
                 self.current_acting_robot = self.robot_1
 
             # Check if battle ended
             if self.battle_ended() is True:
                 battle_ongoing = False
 
+            attack_points = new_attack_points
+
         winner = self.announce_winner()
 
         return winner
 
 
-robot1 = Robot('spock')
-robot2 = Robot('donald')
+class StrongRobot(Robot):
+    def __init__(self, name, brutality):
+        super().__init__(name)
+        self.brutality = brutality
 
-battleground = Battle(robot1, robot2)
+    def decide_on_action(self, incoming_damage):
+        attack_strength = 0
+
+        self.health_points -= incoming_damage
+
+        if self.energy >= self.brutality / 2 + 1:
+            attack_strength = self.attack()
+
+        return attack_strength
+
+    def attack(self):
+
+        self.energy -= 1 + self.brutality * 0.5
+
+        if random.randint(0, 100) < self.fail_percentage:
+            return 0
+
+        return self.force + self.brutality
+
+
+class CleverRobot(Robot):
+    def __init__(self, name, intelligence):
+        super().__init__(name)
+
+        self.intelligence = intelligence
+
+    def decide_on_action(self, incoming_damage):
+        attack_strength = 0
+
+        if self.energy > 0:
+            if self.energy > 2:
+                if random.randint(0, 100) > (3 + self.intelligence) * 10:
+                    self.health_points -= incoming_damage
+                    attack_strength = self.attack()
+                else:
+                    self.energy -= 2
+            else:
+                self.health_points -= incoming_damage
+                attack_strength = self.attack()
+
+        return attack_strength
+
+
+robot1 = Robot('spock')
+robot3 = StrongRobot('stronk', 10)
+robot4 = CleverRobot('bigBrain', 0)
+
+battleground = Battle(robot1, robot4)
 winn = battleground.battle_until_the_end()
 
 print("The winner is: ", winn)
